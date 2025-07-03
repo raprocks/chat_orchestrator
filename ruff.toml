@@ -1,0 +1,23 @@
+line-length = 100
+exclude = [".git", ".venv", "build", "dist", "*.egg-info", "__pycache__"]
+select = [
+    "E",
+    "F",
+    "W",
+    "I",
+    "N",
+    "UP",
+    "B",
+    "C4",
+    "SIM",
+    "TID",
+    "ARG",
+    "PL",
+    "RUF",
+]
+ignore = ["E501"] # Ignore line length if you want, or remove this to enforce
+
+[format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = true
