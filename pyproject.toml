@@ -13,12 +13,5 @@ dependencies = [
 mongo = ["pymongo>=4.13.2"]
 redis = ["redis>=6.2.0"]
 
-[tool.setuptools]
-packages = ["chat_orchestrator"]
-
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
-
 [dependency-groups]
 dev = ["ruff>=0.11.7"]
