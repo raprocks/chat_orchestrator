@@ -35,30 +35,26 @@ class MongoDBStateManager(StateManager):
         db_name: str = "chat_orchestrator",
         collection: str = "states",
     ):
-        self.uri = uri
-        self.db_name = db_name
-        self.collection = collection
-
-    def _get_db(self):
-        client = MongoClient[Dict[str, Any]](self.uri)
-        db = client[self.db_name]
-        return db
+        self.client = MongoClient[Dict[str, Any]](uri)
+        self.db = self.client[db_name]
+        self.collection = self.db.get_collection(collection)
 
     def get_state(self, chat_id: str) -> tuple[str | None, dict[str, Any]]:
-        collection = self._get_db()[self.collection]
-        doc = collection.find_one({"chat_id": chat_id})
+        doc = self.collection.find_one({"chat_id": chat_id})
         if doc and "state_id" in doc and "context" in doc:
             return doc["state_id"], doc["context"]
         return None, {}
 
     def set_state(self, chat_id: str, state_id: str, context: dict[str, Any]) -> None:
-        collection = self._get_db()[self.collection]
-        collection.update_one(
+        self.collection.update_one(
             {"chat_id": chat_id},
             {"$set": {"state_id": state_id, "context": context}},
             upsert=True,
         )
 
     def delete_state(self, chat_id: str) -> None:
-        collection = self._get_db()[self.collection]
-        collection.delete_one({"chat_id": chat_id})
+        self.collection.delete_one({"chat_id": chat_id})
+
+    def close(self):
+        """Closes the MongoDB client connection."""
+        self.client.close()
