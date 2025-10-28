@@ -1,32 +1,13 @@
+"""Message sender for the WhatsApp Cloud API.
+
+This module provides a `WhatsAppSender` class to send various types of messages
+through the official WhatsApp Cloud API. It includes strictly typed dictionaries
+for all supported message payloads, ensuring that the data sent to the API is
+correctly formatted.
+
+For more information on the message payloads, see the official WhatsApp Cloud API
+documentation: https://developers.facebook.com/docs/whatsapp/cloud-api/reference/messages
 """
-WhatsAppSender: Send messages via the WhatsApp Cloud API.
-
-Description:
-    Sends all supported WhatsApp message types (text, media, interactive, template, reaction, contextual replies, location, contacts, etc.) using the official WhatsApp Cloud API.
-    Strictly typed with TypedDict, Literal, and Union for payloads and options.
-
-How to initialize:
-    sender = WhatsAppSender(phone_number_id="<ID>", access_token="<TOKEN>", api_version="v19.0")
-
-Options (WhatsAppPayload):
-    The 'options' parameter must be one of the following TypedDicts, each corresponding to a WhatsApp message type:
-
-    - TextPayload:      {"type": "text", "text": {"body": str, ...}, "context": dict | None}
-    - ImagePayload:     {"type": "image", "image": {...}, "context": dict | None}
-    - AudioPayload:     {"type": "audio", "audio": {...}, "context": dict | None}
-    - VideoPayload:     {"type": "video", "video": {...}, "context": dict | None}
-    - DocumentPayload:  {"type": "document", "document": {...}, "context": dict | None}
-    - StickerPayload:   {"type": "sticker", "sticker": {...}, "context": dict | None}
-    - LocationPayload:  {"type": "location", "location": {...}, "context": dict | None}
-    - ContactsPayload:  {"type": "contacts", "contacts": [...], "context": dict | None}
-    - ReactionPayload:  {"type": "reaction", "reaction": {...}, "context": dict | None}
-    - TemplatePayload:  {"type": "template", "template": {...}, "context": dict | None}
-    - InteractivePayload: {"type": "interactive", "interactive": {...}, "context": dict | None}
-
-    See WhatsApp Cloud API docs for the exact structure of each payload type.
-    If 'options' is None, a simple text message is sent using the 'text' argument.
-"""
-
 import requests
 from typing import Any, Optional, TypedDict, Literal, Union, Dict, cast
 from ..senders.base import MessageSender
@@ -34,74 +15,86 @@ from loguru import logger
 
 
 class ContextPayload(TypedDict):
+    """A payload for providing context to a message, such as replying to another message."""
     message_id: str
 
 
 # --- TypedDicts for WhatsApp message payloads ---
 class TextPayload(TypedDict, total=True):
+    """Payload for sending a text message."""
     type: Literal["text"]
     text: Dict[str, Any]
-    context: ContextPayload | None
+    context: Optional[ContextPayload]
 
 
 class ImagePayload(TypedDict, total=True):
+    """Payload for sending an image message."""
     type: Literal["image"]
     image: Dict[str, Any]
-    context: ContextPayload | None
+    context: Optional[ContextPayload]
 
 
 class AudioPayload(TypedDict, total=True):
+    """Payload for sending an audio message."""
     type: Literal["audio"]
     audio: Dict[str, Any]
-    context: ContextPayload | None
+    context: Optional[ContextPayload]
 
 
 class VideoPayload(TypedDict, total=True):
+    """Payload for sending a video message."""
     type: Literal["video"]
     video: Dict[str, Any]
-    context: ContextPayload | None
+    context: Optional[ContextPayload]
 
 
 class DocumentPayload(TypedDict, total=True):
+    """Payload for sending a document message."""
     type: Literal["document"]
     document: Dict[str, Any]
-    context: ContextPayload | None
+    context: Optional[ContextPayload]
 
 
 class StickerPayload(TypedDict, total=True):
+    """Payload for sending a sticker message."""
     type: Literal["sticker"]
     sticker: Dict[str, Any]
-    context: ContextPayload | None
+    context: Optional[ContextPayload]
 
 
 class LocationPayload(TypedDict, total=True):
+    """Payload for sending a location message."""
     type: Literal["location"]
     location: Dict[str, Any]
-    context: ContextPayload | None
+    context: Optional[ContextPayload]
 
 
 class ContactsPayload(TypedDict, total=True):
+    """Payload for sending a contacts message."""
     type: Literal["contacts"]
     contacts: Any
-    context: ContextPayload | None
+    context: Optional[ContextPayload]
 
 
 class ReactionPayload(TypedDict, total=True):
+    """Payload for sending a reaction to a message."""
     type: Literal["reaction"]
     reaction: Dict[str, Any]
-    context: ContextPayload | None
+    context: Optional[ContextPayload]
 
 
 class TemplatePayload(TypedDict, total=True):
+    """Payload for sending a message template."""
     type: Literal["template"]
     template: Dict[str, Any]
-    context: ContextPayload | None
+    context: Optional[ContextPayload]
 
 
 class InteractivePayload(TypedDict, total=True):
+    """Payload for sending an interactive message."""
     type: Literal["interactive"]
     interactive: Dict[str, Any]
-    context: ContextPayload | None
+    context: Optional[ContextPayload]
 
 
 WhatsAppPayload = Union[
@@ -117,41 +110,34 @@ WhatsAppPayload = Union[
     TemplatePayload,
     InteractivePayload,
 ]
+"""A union of all supported WhatsApp message payload types."""
 
 
 class WhatsAppSender(MessageSender):
-    """
-    WhatsAppSender: Send messages via the WhatsApp Cloud API.
+    """Sends messages via the WhatsApp Cloud API.
 
-    Description:
-        Sends all supported WhatsApp message types (text, media, interactive, template, reaction, contextual replies, location, contacts, etc.) using the official WhatsApp Cloud API.
-        Strictly typed with TypedDict, Literal, and Union for payloads and options.
+    This class handles the sending of all supported WhatsApp message types,
+    including text, media, interactive messages, and templates. It uses
+    strictly typed dictionaries (`TypedDict`) to ensure that the payloads
+    sent to the API are correctly formatted.
 
-    How to initialize:
-        sender = WhatsAppSender(phone_number_id="<ID>", access_token="<TOKEN>", api_version="v19.0")
-
-    Options (WhatsAppPayload):
-        The 'options' parameter must be one of the following TypedDicts, each corresponding to a WhatsApp message type:
-
-        - TextPayload:      {"type": "text", "text": {"body": str, ...}, "context": dict | None}
-        - ImagePayload:     {"type": "image", "image": {...}, "context": dict | None}
-        - AudioPayload:     {"type": "audio", "audio": {...}, "context": dict | None}
-        - VideoPayload:     {"type": "video", "video": {...}, "context": dict | None}
-        - DocumentPayload:  {"type": "document", "document": {...}, "context": dict | None}
-        - StickerPayload:   {"type": "sticker", "sticker": {...}, "context": dict | None}
-        - LocationPayload:  {"type": "location", "location": {...}, "context": dict | None}
-        - ContactsPayload:  {"type": "contacts", "contacts": [...], "context": dict | None}
-        - ReactionPayload:  {"type": "reaction", "reaction": {...}, "context": dict | None}
-        - TemplatePayload:  {"type": "template", "template": {...}, "context": dict | None}
-        - InteractivePayload: {"type": "interactive", "interactive": {...}, "context": dict | None}
-
-        See WhatsApp Cloud API docs for the exact structure of each payload type.
-        If 'options' is None, a simple text message is sent using the 'text' argument.
+    Attributes:
+        phone_number_id: The ID of the phone number to send messages from.
+        access_token: The access token for the WhatsApp Cloud API.
+        api_version: The version of the WhatsApp Cloud API to use.
+        endpoint: The API endpoint for sending messages.
     """
 
     def __init__(
         self, phone_number_id: str, access_token: str, api_version: str = "v19.0"
     ):
+        """Initializes the WhatsAppSender.
+
+        Args:
+            phone_number_id: The ID of the phone number to send messages from.
+            access_token: The access token for the WhatsApp Cloud API.
+            api_version: The version of the API to use. Defaults to "v19.0".
+        """
         self.phone_number_id = phone_number_id
         self.access_token = access_token
         self.api_version = api_version
@@ -160,9 +146,24 @@ class WhatsAppSender(MessageSender):
     def send_message(
         self,
         chat_id: str,
-        text: Optional[str],
+        text: Optional[str] = None,
         options: Optional[WhatsAppPayload] = None,
-    ):
+    ) -> None:
+        """Sends a message to a WhatsApp user.
+
+        This method constructs the appropriate payload and sends it to the
+        WhatsApp Cloud API. If `options` are not provided, it sends a simple
+        text message using the `text` argument.
+
+        Args:
+            chat_id: The recipient's WhatsApp ID.
+            text: The text of the message. Required if `options` is not provided.
+            options: A `WhatsAppPayload` dictionary containing the message details.
+                This allows for sending complex message types like images, buttons, etc.
+
+        Raises:
+            requests.exceptions.HTTPError: If the API returns an error.
+        """
         payload = self._build_payload(chat_id, text, options)
         headers = {
             "Authorization": f"Bearer {self.access_token}",
@@ -175,6 +176,23 @@ class WhatsAppSender(MessageSender):
     def _build_payload(
         self, chat_id: str, text: Optional[str], options: Optional[WhatsAppPayload]
     ) -> dict:
+        """Builds the payload for the WhatsApp API request.
+
+        This private method constructs the JSON payload based on the provided
+        message type and options.
+
+        Args:
+            chat_id: The recipient's WhatsApp ID.
+            text: The text of the message. Used for default text messages.
+            options: The `WhatsAppPayload` with the message details.
+
+        Returns:
+            A dictionary representing the JSON payload for the API request.
+
+        Raises:
+            ValueError: If `options` is not provided and `text` is None, or if
+                the message type in `options` is unsupported.
+        """
         base: Dict[str, Any] = {
             "messaging_product": "whatsapp",
             "recipient_type": "individual",
