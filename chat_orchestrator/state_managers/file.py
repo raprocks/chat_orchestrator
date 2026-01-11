@@ -19,8 +19,9 @@ Methods:
 
 import json
 import os
-from .base import StateManager
 from typing import Any
+
+from .base import StateManager
 
 
 class FileStateManager(StateManager):
