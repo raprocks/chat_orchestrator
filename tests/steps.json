@@ -1,0 +1,3 @@
+{
+  "start": "tests.dummy_handler.dummy_start_handler"
+}

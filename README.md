@@ -72,4 +72,40 @@ Add your own modules to `senders/` or `state_managers/` for new backends.
 
 ---
 
+
 For more, see the code and docstrings in each module.
+
+## JSON Step Registration
+
+You can register steps using a JSON configuration file, which keeps your code clean and decoupling logic from configuration.
+
+### Usage
+
+```python
+orchestrator.register_steps_from_json("steps.json")
+```
+
+The JSON file acts as a mapping key-value store where the key is the state ID and the value is either:
+
+1.  **A dot-separated string**: Pointing to a function in a module (e.g., `my_app.handlers.start_step`).
+2.  **Inline Code**: A string containing the full function definition.
+
+### Example `steps.json`
+
+```json
+{
+  "start": "my_app.handlers.start_step",
+  "process_input": "def process_input(chat_id, user_input, context, sender):\n    sender.send_message(chat_id, f'Echo: {user_input}')\n    return 'start', {}"
+}
+```
+
+### Inline Code Security
+
+When using inline code, the following security measures are enforced:
+
+*   **No Imports**: `import` and `from ... import` statements are strictly forbidden.
+*   **Blacklisted Names**: Usage of `os`, `sys`, `subprocess`, `eval`, `exec`, `open`, `__import__` is blocked.
+*   **Signature Check**: The function must accept exactly 4 arguments: `chat_id`, `user_input`, `context`, `sender`.
+*   **Single Function**: The code block must contain exactly one top-level function definition.
+
+This ensures that while users can define simple logic dynamically, they cannot execute malicious system commands.
